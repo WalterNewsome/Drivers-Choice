@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3mobile.css">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript">
+function scan(){
+	document.getElementById("demo").innerHTML = "Opening camera...";
+	console.log("clicked");
+	cordova.plugins.barcodeScanner.scan(function(result){
+		document.getElementById("demo").innerHTML = "Loading...";
+		var obj = JSON.parse(JSON.stringify(result));
+		var VIN=obj.text;
+		//Asking Server
+		var request = new XMLHttpRequest();
+		jQuery.support.cors = true;
+		$.ajax({
+    		url: "https://vaash.com/app/receive_data.php",
+    		data: { "vin":VIN },
+    		type: "GET",
+    		timeout: 9000,
+    		dataType: "text",
+    		success: function(data) {
+    			document.getElementById("demo").innerHTML = data;
+    			},
+    		error: function(jqXHR, textStatus, ex) {
+        		document.getElementById("demo").innerHTML = "Can't Connect to server :(";
+    			}
+			});    		
+},function(error){ alert(JSON.stringify(error)); });
+};
+function inventory(){
+	var request = new XMLHttpRequest();
+		jQuery.support.cors = true;
+		$.ajax({
+    		url: "https://vaash.com/app/display_inventory.php",
+    		type: "GET",
+    		timeout: 9000,
+    		dataType: "text",
+    		success: function(data) {
+    			document.getElementById("demo").innerHTML = data;
+    			},
+    		error: function(jqXHR, textStatus, ex) {
+        		document.getElementById("demo").innerHTML = "Can't Connect to server :(";
+    			}
+			});
+
+};
+function edit(vin1){
+	document.getElementById("demo").innerHTML = "Loading...";
+	var request = new XMLHttpRequest();
+		jQuery.support.cors = true;
+		$.ajax({
+    		url: "https://vaash.com/app/receive_data.php",
+    		data: { "vin":vin1 },
+    		type: "GET",
+    		timeout: 9000,
+    		dataType: "text",
+    		success: function(data) {
+    			document.getElementById("demo").innerHTML = data;
+    			},
+    		error: function(jqXHR, textStatus, ex) {
+        		document.getElementById("demo").innerHTML = "Can't Connect to server :(";
+    			}
+		});
+};
+</script>
+
+</head>
+<body onload="inventory()">
+<div class="w3-container w3-card">
+  <h2>Drivers Choice App</h2>
+</div>
+<br>
+<center>
+ <button onclick="scan()" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera">Scan VIN</button>
+ <button onclick="inventory()" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-search">Inventory</button>
+
+
+ <p id="demo"></p>
+ </center>
+</body>
+<script>
+function save(){
+	var VINS=document.getElementById("VINS").value;
+	var Year=document.getElementById("Year").value;
+	var Make=document.getElementById("Make").value;
+	var Model=document.getElementById("Model").value;
+	var Mileage=document.getElementById("number-pattern").value;
+	var Color=document.getElementById("text-basic").value;
+	var Concern=document.getElementById("textarea").value;
+	if ($('input.onoffswitch-checkbox').is(':checked')) { var in_shop=1;} else {var in_shop=0;};
+	document.getElementById("demo").innerHTML = "Loading...";
+		$.ajax({
+    		url: "https://vaash.com/app/db_save.php",
+    		data: { 
+    			"vin":VINS,
+    			"Year":Year,
+    			"Make":Make,
+    			"Model":Model,
+    			"Mileage":Mileage,
+    			"Color":Color,
+    			"Concern":Concern,
+    			"in_shop":in_shop
+    		},
+    		type: "GET",
+    		timeout: 9000,
+    		dataType: "text",
+    		success: function(data) {
+    			document.getElementById("demo").innerHTML = data;
+    			},
+    		error: function(jqXHR, textStatus, ex) {
+        		document.getElementById("demo").innerHTML = "Can't save data :(";
+    			}
+			}); 
+};
+function cancel(){ document.getElementById("demo").innerHTML = "Vehicle not saved."; };
+</script>
+
+</html>
